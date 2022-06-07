@@ -1,5 +1,21 @@
-import { Audio } from 'react-loader-spinner';
+import React from 'react';
+import { css } from '@emotion/react';
+import PulseLoader from 'react-spinners/PulseLoader';
+
+const override = css`
+  display: block;
+  margin: 0 auto;
+  margin-top: 20px;
+`;
 
 export default function Loader() {
-  return <Audio height="100" width="100" color="grey" ariaLabel="loading" />;
+  return (
+    <PulseLoader
+      css={override}
+      size={20}
+      margin={10}
+      color={'#123abc'}
+      speedMultiplier={1.5}
+    />
+  );
 }

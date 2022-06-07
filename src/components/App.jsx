@@ -1,21 +1,24 @@
 import React, { Component } from 'react';
 import { ToastContainer } from 'react-toastify';
-import axios from 'axios';
-import 'react-toastify/dist/ReactToastify.css';
+
+import { GalleryApi } from './Gallery/GalleryApi';
 import Searchbar from './Gallery/Searchbar/Searchbar';
 import ImageGallery from './Gallery/ImageGallery/ImageGallery';
+import Loader from './Gallery/Loader/Loader';
+import Button from './Gallery/Button/Button';
+import Modal from './Gallery/Modal/Modal';
 
-// import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
+import 'react-toastify/dist/ReactToastify.css';
 import 'index.css';
-
-axios.defaults.baseURL = 'https://pixabay.com/api';
-const KEY_API = '27157925-5efc8a27cb1dac55eac7638cc';
 
 export default class App extends Component {
   state = {
     inputValue: '',
     gallery: [],
     loading: false,
+    page: 1,
+    showModal: false,
+    modalImg: '',
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -23,70 +26,76 @@ export default class App extends Component {
     const nextValue = this.state.inputValue;
 
     if (prevValue !== nextValue) {
-      this.setState({ loading: true, gallery: [] });
+      this.setState({ gallery: [] });
 
-      axios
-        .get(
-          `/?q=${nextValue}&page=1&key=${KEY_API}&image_type=photo&orientation=horizontal&per_page=12`
-        )
-        .then(response => {
-          this.setState(prevState => ({
-            gallery: [...response.data.hits, ...prevState.gallery],
-          }));
-        })
-        .catch(function (error) {
-          console.log(error);
-        })
-        .finally(() => this.setState({ loading: false }));
+      this.showImages();
     }
   }
+
+  showImages = () => {
+    const nextValue = this.state.inputValue;
+    const nextPage = this.state.page;
+    // console.log(nextPage);
+
+    this.setState({ loading: true });
+
+    GalleryApi(nextValue, nextPage)
+      .then(response => {
+        this.setState(prevState => ({
+          gallery: [...prevState.gallery, ...response.data.hits],
+          page: prevState.page + 1,
+        }));
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+      .finally(() => this.setState({ loading: false }));
+  };
 
   handleFormSubmit = ({ value }) => {
     this.setState({
       inputValue: value,
-      gallery: [],
+      page: 1,
     });
   };
 
+  LargeImg = large => {
+    this.setState({
+      modalImg: large,
+    });
+  };
+
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
+    }));
+  };
+
   render() {
-    const { gallery, loading } = this.state;
+    const { gallery, loading, showModal, modalImg } = this.state;
 
     return (
       <div className="App">
         <Searchbar onSubmit={this.handleFormSubmit} />
-        {loading && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              fontSize: '20px',
-            }}
-          >
-            Loading
-          </div>
+        {gallery.length > 0 && (
+          <ImageGallery
+            options={gallery}
+            onClick={this.toggleModal}
+            modalImg={this.LargeImg}
+          />
         )}
-        {gallery.length > 0 && <ImageGallery options={gallery} />}
+        {loading && <Loader />}
+        {gallery.length > 0 && !loading && (
+          <Button nextPage={this.showImages} />
+        )}
+        {showModal && (
+          <Modal onClick={this.toggleModal}>
+            <img style={{ width: 1000 }} src={modalImg} alt="modal" />
+          </Modal>
+        )}
+
         <ToastContainer autoClose={3000} />
       </div>
     );
   }
 }
-
-// showImages() {
-//   axios
-//     .get(
-//       `https://pixabay.com/api/?q=${this.state.inputValue}&page=1&key=${KEY_API}&image_type=photo&orientation=horizontal&per_page=12`
-//     )
-//     .then(response => {
-//       this.setState(prevState => ({
-//         gallery: [response.data.hits, ...prevState.gallery],
-//       }));
-//     });
-// }
-
-// showImages = options => {
-//   const hits = options.data.hits;
-//   this.setState(prevState => ({
-//     gallery: [hits, ...prevState.gallery],
-//   }));
-// };

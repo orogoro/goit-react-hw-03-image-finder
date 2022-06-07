@@ -19,13 +19,7 @@ export default class SearchForm extends Component {
     }
 
     this.props.onSubmit(this.state);
-
-    // this.reset();
   };
-
-  //   reset = () => {
-  //     this.setState({ value: '' });
-  //   };
 
   render() {
     return (
