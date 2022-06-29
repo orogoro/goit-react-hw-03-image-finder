@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { toast } from 'react-toastify';
+import PropTypes from 'prop-types';
+
 import styles from './SearchForm.module.css';
 
 export default class SearchForm extends Component {
@@ -42,3 +44,7 @@ export default class SearchForm extends Component {
     );
   }
 }
+
+SearchForm.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};
