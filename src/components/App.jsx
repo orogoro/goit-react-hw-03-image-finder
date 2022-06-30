@@ -24,37 +24,40 @@ export default class App extends Component {
   componentDidUpdate(prevProps, prevState) {
     const prevValue = prevState.inputValue;
     const nextValue = this.state.inputValue;
+    const prevPage = prevState.page;
+    const nextPage = this.state.page;
 
-    if (prevValue !== nextValue) {
-      this.setState({ gallery: [] });
+    if (prevValue !== nextValue || prevPage !== nextPage) {
+      this.setState({ loading: true });
 
-      this.showImages();
+      GalleryApi(nextValue, nextPage)
+        .then(response => {
+          this.setState(prevState => ({
+            gallery: [...prevState.gallery, ...response.data.hits],
+          }));
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+        .finally(() => this.setState({ loading: false }));
     }
   }
 
   showImages = () => {
-    const nextValue = this.state.inputValue;
-    const nextPage = this.state.page;
-    // console.log(nextPage);
-
-    this.setState({ loading: true });
-
-    GalleryApi(nextValue, nextPage)
-      .then(response => {
-        this.setState(prevState => ({
-          gallery: [...prevState.gallery, ...response.data.hits],
-          page: prevState.page + 1,
-        }));
-      })
-      .catch(function (error) {
-        console.log(error);
-      })
-      .finally(() => this.setState({ loading: false }));
+    this.setState(prevState => ({
+      page: prevState.page + 1,
+    }));
   };
 
   handleFormSubmit = ({ value }) => {
+    const prevState = this.state.inputValue;
+    if (prevState === value) {
+      return;
+    }
+
     this.setState({
       inputValue: value,
+      gallery: [],
       page: 1,
     });
   };
