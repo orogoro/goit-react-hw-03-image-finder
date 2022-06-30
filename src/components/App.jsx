@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { ToastContainer } from 'react-toastify';
+import { animateScroll as scroll } from 'react-scroll';
 
 import { GalleryApi } from './Gallery/GalleryApi';
 import Searchbar from './Gallery/Searchbar/Searchbar';
@@ -47,6 +48,7 @@ export default class App extends Component {
     this.setState(prevState => ({
       page: prevState.page + 1,
     }));
+    scroll.scrollToBottom();
   };
 
   handleFormSubmit = ({ value }) => {
